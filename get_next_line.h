@@ -6,7 +6,7 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:26:28 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/18 16:00:24 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/21 13:56:13 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <fcntl.h>
 # include <stdbool.h>
+# include <stddef.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -25,8 +26,9 @@
 
 char	*get_next_line(int fd);
 char	*get_next_nl(char *buffer, ssize_t bytes_read);
-long	ft_strlen(char *str);
 char	*re_nl(char *nl, char *buffer, char *next_nl);
+void	custom_cpy(char *dest, const char *start, const char *end);
+char	*get_str_end(const char *str);
 void	update_buffer(char *buffer, char *next_nl);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:25:13 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/18 16:00:57 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/21 14:03:46 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,16 +23,20 @@ char	*get_next_line(int fd)
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 	else
 		bytes_read = BUFFER_SIZE;
-	next_nl = get_next_nl(buffer, bytes_read);
-	printf("%s: %s\n", buffer, next_nl);
-	while (*next_nl != '\n')
+	if (bytes_read <= 0)
+		return (NULL);
+	nl = NULL;
+	while (!nl || (*next_nl != '\n' && *buffer))
 	{
+		next_nl = get_next_nl(buffer, bytes_read);
 		nl = re_nl(nl, buffer, next_nl);
 		if (!nl)
 			return (NULL);
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		printf("next_nl: %s\nnl: %s\nbuffer: %s\n", next_nl, nl, buffer);
+		update_buffer(buffer, next_nl);
+		printf("new_buffer: %s\n-----------------------------------------\n ",
+			buffer);
 	}
-	update_buffer(buffer, next_nl);
 	return (nl);
 }
 
@@ -51,6 +55,7 @@ int	main(void)
 	while (next_line)
 	{
 		printf("%s", next_line);
+		free(next_line);
 		next_line = get_next_line(fd);
 	}
 	close(fd);
