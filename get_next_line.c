@@ -6,7 +6,7 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:25:13 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/21 15:09:09 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/22 13:55:35 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 char	*get_next_line(int fd)
 {
-	static char	buffer[BUFFER_SIZE];
+	static char	buffer[BUFFER_SIZE + 1];
 	char		*nl;
 	char		*next_nl;
 	ssize_t		bytes_read;
@@ -23,19 +23,20 @@ char	*get_next_line(int fd)
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 	else
 		bytes_read = BUFFER_SIZE;
-	if (bytes_read <= 0)
-		return (NULL);
 	nl = NULL;
-	while (1)
+	if (bytes_read <= 0)
+		return (update_buffer(buffer, nl, NULL, bytes_read));
+	while (bytes_read > 0)
 	{
 		next_nl = get_next_nl(buffer, bytes_read);
 		nl = re_nl(nl, buffer, next_nl);
 		if (!nl)
 			return (NULL);
 		if (*next_nl == '\n')
-			return (update_buffer(buffer, next_nl), nl);
-		update_buffer(buffer, next_nl);
+			return (update_buffer(buffer, nl, next_nl, bytes_read));
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
 	}
+	return (update_buffer(buffer, nl, next_nl, bytes_read));
 }
 
 // int	main(void)

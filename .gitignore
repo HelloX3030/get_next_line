@@ -4,6 +4,7 @@
 *.a
 # *.md
 *.out
+.vscode
 
 # Prerequisites
 *.d
