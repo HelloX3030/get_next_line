@@ -6,7 +6,7 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:26:28 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/23 16:47:03 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/23 17:26:46 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 
 char	*get_next_line(int fd);
 char	*get_next_nl(char *s);
-char	*ft_strdup(const char *s);
+char	*ft_strdup(const char *s, char *ln);
 char	*ft_strjoin(char *s1, char const *s2);
 void	*ft_memmove(void *dst, const void *src, size_t len);
 ssize_t	ft_strlen(const char *s);
