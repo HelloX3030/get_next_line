@@ -6,15 +6,14 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:25:13 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/23 17:46:11 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/24 12:34:06 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	failure_cleanup(char *buffer, char *nl)
+void	failure_cleanup(char *nl)
 {
-	*buffer = 0;
 	if (nl)
 		free(nl);
 }
@@ -27,8 +26,7 @@ char	*handle_found_nl(char *buffer, char *next_nl, char *nl)
 	new_nl = malloc(buffer - next_nl + nl_len + 1);
 	if (!new_nl)
 	{
-		if (nl)
-			free(nl);
+		failure_cleanup(nl);
 		return (NULL);
 	}
 	ft_memmove(new_nl, nl, nl_len);
@@ -45,12 +43,31 @@ char	*handle_zero_read(char *buffer, char *nl)
 	{
 		new_str = ft_strjoin(nl, buffer);
 		if (!new_str)
-			return (NULL);
+			return (failure_cleanup(nl), NULL);
 		*buffer = 0;
-		return (new_str);
+		return (failure_cleanup(nl), new_str);
 	}
 	else
 		return (NULL);
+}
+
+int	handle_start_buffer(char *buffer, char **nl)
+{
+	char	*next_nl;
+
+	if (!*buffer)
+		return (0);
+	next_nl = get_next_nl(buffer);
+	if (next_nl)
+		return (*nl = handle_found_nl(buffer, next_nl, *nl), 1);
+	else
+	{
+		*nl = ft_strdup(buffer);
+		if (!*nl)
+			return (*nl = NULL, 1);
+		else
+			return (0);
+	}
 }
 
 char	*get_next_line(int fd)
@@ -59,43 +76,48 @@ char	*get_next_line(int fd)
 	char		*next_nl;
 	char		*nl;
 	ssize_t		bytes_read;
+	char		*new_nl;
 
 	nl = NULL;
+	if (handle_start_buffer(buffer, &nl))
+		return (nl);
 	while (1)
 	{
-		next_nl = get_next_nl(buffer);
-		if (next_nl)
-			return (handle_found_nl(buffer, next_nl, nl));
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
-			return (failure_cleanup(buffer, nl), NULL);
+			return (*buffer = 0, failure_cleanup(nl), NULL);
 		else if (bytes_read == 0)
 			return (handle_zero_read(buffer, nl));
 		buffer[bytes_read] = 0;
-		nl = ft_strjoin(nl, buffer);
-		if (!nl)
+		next_nl = get_next_nl(buffer);
+		if (next_nl)
+			return (handle_found_nl(buffer, next_nl, nl));
+		new_nl = ft_strjoin(nl, buffer);
+		failure_cleanup(nl);
+		if (!new_nl)
 			return (NULL);
+		nl = new_nl;
 	}
 }
 
-// int	main(void)
-// {
-// 	int		fd;
-// 	char	*next_line;
+int	main(void)
+{
+	int		fd;
+	char	*next_line;
 
-// 	fd = open("e.txt", O_RDONLY);
-// 	if (fd == -1)
-// 	{
-// 		perror("Failed to open e.txt");
-// 		return (-1);
-// 	}
-// 	next_line = get_next_line(fd);
-// 	while (next_line)
-// 	{
-// 		printf("%s\n-----------------------\n", next_line);
-// 		free(next_line);
-// 		next_line = get_next_line(fd);
-// 	}
-// 	close(fd);
-// 	return (0);
-// }
+	fd = open("e.txt", O_RDONLY);
+	if (fd == -1)
+	{
+		perror("Failed to open e.txt");
+		return (-1);
+	}
+	next_line = get_next_line(fd);
+	while (next_line)
+	{
+		printf("%s\n-----------------------\n", next_line);
+		free(next_line);
+		next_line = get_next_line(fd);
+	}
+	close(fd);
+	return (0);
+}

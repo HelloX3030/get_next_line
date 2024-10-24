@@ -6,7 +6,7 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:26:28 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/23 17:26:46 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/24 11:25:49 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,19 +24,18 @@
 #  define BUFFER_SIZE 1
 # endif
 
+// Handle Functions
 char	*get_next_line(int fd);
-char	*get_next_nl(char *s);
-char	*ft_strdup(const char *s, char *ln);
-char	*ft_strjoin(char *s1, char const *s2);
-void	*ft_memmove(void *dst, const void *src, size_t len);
-ssize_t	ft_strlen(const char *s);
+void	failure_cleanup(char *nl);
+char	*handle_found_nl(char *buffer, char *next_nl, char *nl);
+char	*handle_zero_read(char *buffer, char *nl);
+int		handle_start_buffer(char *buffer, char **nl);
 
-// char		*get_next_line(int fd);
-// char		*get_next_nl(char *buffer, ssize_t bytes_read);
-// char		*re_nl(char *nl, char *buffer, char *next_nl);
-// ptrdiff_t	custom_cpy(char *dest, const char *src, ptrdiff_t len);
-// ptrdiff_t	ft_strlen(const char *s);
-// char		*update_buffer(char *buffer, char *nl, char *next_nl,
-// 				ssize_t bytes_read);
+// Utilitz Functions
+char	*get_next_nl(char *s);
+ssize_t	ft_strlen(const char *s);
+char	*ft_strdup(const char *s);
+char	*ft_strjoin(const char *s1, char const *s2);
+void	*ft_memmove(void *dst, const void *src, size_t len);
 
 #endif
