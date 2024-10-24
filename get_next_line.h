@@ -6,7 +6,7 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:26:28 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/24 11:25:49 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/24 13:56:35 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@
 char	*get_next_line(int fd);
 void	failure_cleanup(char *nl);
 char	*handle_found_nl(char *buffer, char *next_nl, char *nl);
-char	*handle_zero_read(char *buffer, char *nl);
 int		handle_start_buffer(char *buffer, char **nl);
 
 // Utilitz Functions
