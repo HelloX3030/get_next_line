@@ -6,7 +6,7 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:25:13 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/24 14:26:22 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/25 15:44:32 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ char	*handle_found_nl(char *buffer, char *next_nl, char *nl)
 	return (new_nl);
 }
 
-int	handle_start_buffer(char *buffer, char **nl)
+bool	handle_start_buffer(char *buffer, char **nl, ssize_t *nl_r_len)
 {
 	char	*next_nl;
 
@@ -46,7 +46,8 @@ int	handle_start_buffer(char *buffer, char **nl)
 		return (*nl = handle_found_nl(buffer, next_nl, *nl), 1);
 	else
 	{
-		*nl = ft_strdup(buffer);
+		*nl_r_len = BUFFER_SIZE * 2;
+		*nl = rstr(buffer, nl_r_len);
 		if (!*nl)
 			return (*nl = NULL, 1);
 		else
@@ -54,32 +55,50 @@ int	handle_start_buffer(char *buffer, char **nl)
 	}
 }
 
+bool	read_buffer(int fd, char *buffer, char **nl, ssize_t *nl_r_len)
+{
+	char	*new_str;
+	ssize_t	bytes_read;
+
+	bytes_read = read(fd, buffer, BUFFER_SIZE);
+	if (bytes_read == -1)
+		return (*buffer = 0, failure_cleanup(*nl), *nl = NULL, 1);
+	else if (bytes_read == 0)
+	{
+		if (!*nl)
+			return (*buffer = 0, 1);
+		*nl_r_len = 0;
+		new_str = rstr(*nl, nl_r_len);
+		if (!new_str)
+			return (failure_cleanup(*nl), *nl = NULL, 1);
+		failure_cleanup(*nl);
+		*nl = new_str;
+		return (*buffer = 0, 1);
+	}
+	buffer[bytes_read] = 0;
+	return (0);
+}
+
 char	*get_next_line(int fd)
 {
-	static char	buffer[BUFFER_SIZE + 1] = {0};
+	static char	buffer[BUFFER_SIZE + 1];
 	char		*next_nl;
 	char		*nl;
-	ssize_t		bytes_read;
-	char		*new_nl;
+	ssize_t		nl_r_len;
 
 	nl = NULL;
-	if (handle_start_buffer(buffer, &nl))
+	nl_r_len = 0;
+	if (handle_start_buffer(buffer, &nl, &nl_r_len))
 		return (nl);
 	while (1)
 	{
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read == -1)
-			return (*buffer = 0, failure_cleanup(nl), NULL);
-		else if (bytes_read == 0)
-			return (*buffer = 0, nl);
-		buffer[bytes_read] = 0;
+		if (read_buffer(fd, buffer, &nl, &nl_r_len))
+			return (nl);
 		next_nl = get_next_nl(buffer);
 		if (next_nl)
 			return (handle_found_nl(buffer, next_nl, nl));
-		new_nl = ft_strjoin(nl, buffer);
-		if (failure_cleanup(nl), !new_nl)
+		if (buffer_join(&nl, buffer, &nl_r_len))
 			return (NULL);
-		nl = new_nl;
 	}
 }
 
@@ -97,7 +116,7 @@ char	*get_next_line(int fd)
 // 	next_line = get_next_line(fd);
 // 	while (next_line)
 // 	{
-// 		printf("\n-----------------------\n%s\n-----------------------\n",
+// 		printf("\n-----------------------\n%s\n-----------------------",
 // 			next_line);
 // 		free(next_line);
 // 		next_line = get_next_line(fd);
