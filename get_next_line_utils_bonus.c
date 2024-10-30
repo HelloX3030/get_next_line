@@ -6,18 +6,18 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 16:18:55 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/29 15:21:38 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/10/30 13:32:32 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-char	*find_nl(char *str)
+char	*find_nl(char *str, ssize_t bytes_read)
 {
-	size_t	i;
+	ssize_t	i;
 
 	i = 0;
-	while (str[i] && i < BUFFER_SIZE)
+	while (i < bytes_read && str[i])
 	{
 		if (str[i] == '\n')
 			return (str + i);
@@ -35,25 +35,24 @@ void	lst_clear(t_lst *lst)
 	}
 }
 
-t_lst	*lst_add(t_lst *lst, char *buffer)
+t_lst	*lst_add(t_lst *lst, char *buffer, ssize_t bytes_read)
 {
 	t_lst	*new_element;
-	size_t	i;
+	ssize_t	i;
 
 	new_element = malloc(sizeof(t_lst));
 	if (!new_element)
 		return (NULL);
 	new_element->next = NULL;
 	i = 0;
-	while (buffer[i] && i < BUFFER_SIZE)
+	while (i < bytes_read && buffer[i])
 	{
 		new_element->str[i] = buffer[i];
 		i++;
 	}
-	if (i < BUFFER_SIZE)
-		new_element->str[i] = 0;
+	new_element->str[i] = 0;
 	if (!lst)
-		return (new_element);
+		return (buffer[0] = 0, new_element);
 	while (lst->next)
 		lst = lst->next;
 	lst->next = new_element;
