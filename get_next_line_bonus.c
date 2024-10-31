@@ -13,14 +13,16 @@
 #include "get_next_line_bonus.h"
 #include <string.h>
 
-char	*get_next_line(int fd)
+char *get_next_line(int fd)
 {
-	static char	rest[MAX_FILE_DESCRIPTORS][BUFFER_SIZE + 1];
-	char		buffer[BUFFER_SIZE];
-	char		*next_nl;
-	t_lst		*lst;
-	ssize_t		bytes_read;
+	static char rest[MAX_FILE_DESCRIPTORS][BUFFER_SIZE + 1];
+	char buffer[BUFFER_SIZE];
+	char *next_nl;
+	t_lst *lst;
+	ssize_t bytes_read;
 
+	if (fd < 0 || fd >= MAX_FILE_DESCRIPTORS)
+		return (NULL);
 	next_nl = find_nl(rest[fd], BUFFER_SIZE);
 	if (next_nl)
 		return (handle_nl_in_rest(next_nl, rest[fd]));
@@ -42,10 +44,11 @@ char	*get_next_line(int fd)
 	}
 }
 
-char	*handle_nl_in_rest(char *next_nl, char *rest)
+char *handle_nl_in_rest(char *next_nl, char *rest)
 {
-	char			*new_str;
-	const ptrdiff_t	dif = next_nl - rest;
+	char *new_str;
+	const ptrdiff_t dif = next_nl - rest;
+	size_t bytes_to_move;
 
 	new_str = malloc(dif + 2);
 	if (!new_str)
@@ -53,16 +56,18 @@ char	*handle_nl_in_rest(char *next_nl, char *rest)
 	ft_memmove(new_str, rest, dif);
 	new_str[dif] = '\n';
 	new_str[dif + 1] = 0;
-	ft_memmove(rest, next_nl + 1, BUFFER_SIZE - dif);
-	rest[BUFFER_SIZE - dif] = 0;
+	bytes_to_move = BUFFER_SIZE - dif - 1;
+	if (bytes_to_move > 0)
+		ft_memmove(rest, next_nl + 1, bytes_to_move);
+	rest[bytes_to_move] = 0;
 	return (new_str);
 }
 
-char	*handle_zero_read(t_lst *lst, size_t bonus_len)
+char *handle_zero_read(t_lst *lst, size_t bonus_len)
 {
-	const t_lst	*lst_start = lst;
-	char		*new_str;
-	size_t		len;
+	const t_lst *lst_start = lst;
+	char *new_str;
+	size_t len;
 
 	len = 0;
 	while (lst)
@@ -87,34 +92,45 @@ char	*handle_zero_read(t_lst *lst, size_t bonus_len)
 	return (lst_clear((t_lst *)lst_start), new_str);
 }
 
-char	*handle_nl_found(char *next_nl, char *buffer, t_lst *lst, char *rest)
+char *handle_nl_found(char *next_nl, char *buffer, t_lst *lst, char *rest)
 {
-	char			*new_str;
-	size_t			len;
-	const ptrdiff_t	dif = next_nl - buffer;
+	char *new_str;
+	size_t len;
+	const ptrdiff_t dif = next_nl - buffer;
 
 	new_str = handle_zero_read(lst, dif + 1);
 	if (!new_str)
 		return (NULL);
 	len = ft_strlen(new_str);
 	ft_memmove(new_str + len, buffer, dif + 1);
-	ft_memmove(rest, next_nl + 1, BUFFER_SIZE - dif);
-	rest[BUFFER_SIZE - dif] = 0;
+	size_t bytes_to_move = BUFFER_SIZE - dif + 1;
+	if (bytes_to_move > 0)
+		ft_memmove(rest, next_nl + 1, bytes_to_move);
+	rest[bytes_to_move] = 0;
+	new_str[len + bytes_to_move] = 0;
+	// write(1, "Found NL!!!\n", 12);
+	// write(1, "Buffer\n", 7);
+	// write(1, buffer, BUFFER_SIZE);
+	// write(1, "Rest\n", 5);
+	// write(1, rest, BUFFER_SIZE);
+	// write(1, "New_str\n", 8);
+	// write(1, new_str, ft_strlen(new_str));
+	// write(1, "End\n", 4);
 	return (new_str);
 }
 
-// int	main(void)
-// {
-// 	char	*str;
-// 	int		fd;
+int main(void)
+{
+	char *str;
+	int fd;
 
-// 	fd = open("test.txt", O_RDONLY);
-// 	str = get_next_line(fd);
-// 	while (str)
-// 	{
-// 		printf("<%s>\n", str);
-// 		free(str);
-// 		str = get_next_line(fd);
-// 	}
-// 	return (0);
-// }
+	fd = open("test.txt", O_RDONLY);
+	str = get_next_line(fd);
+	while (str)
+	{
+		printf("<%s>\n", str);
+		free(str);
+		str = get_next_line(fd);
+	}
+	return (0);
+}
