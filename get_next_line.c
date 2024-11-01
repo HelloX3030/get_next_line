@@ -6,23 +6,23 @@
 /*   By: lseeger <lseeger@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 15:25:13 by lseeger           #+#    #+#             */
-/*   Updated: 2024/10/25 15:44:32 by lseeger          ###   ########.fr       */
+/*   Updated: 2024/11/01 09:34:26 by lseeger          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void failure_cleanup(char *nl)
+void	failure_cleanup(char *nl)
 {
 	if (nl)
 		free(nl);
 }
 
-char *handle_found_nl(char *buffer, char *next_nl, char *nl)
+char	*handle_found_nl(char *buffer, char *next_nl, char *nl)
 {
-	const ptrdiff_t found_len = next_nl - buffer + 1;
-	const ssize_t nl_len = ft_strlen(nl);
-	char *new_nl;
+	const ptrdiff_t	found_len = next_nl - buffer + 1;
+	const ssize_t	nl_len = ft_strlen(nl);
+	char			*new_nl;
 
 	new_nl = malloc(nl_len + found_len + 1);
 	if (!new_nl)
@@ -35,9 +35,9 @@ char *handle_found_nl(char *buffer, char *next_nl, char *nl)
 	return (new_nl);
 }
 
-bool handle_start_buffer(char *buffer, char **nl, ssize_t *nl_r_len)
+bool	handle_start_buffer(char *buffer, char **nl, ssize_t *nl_r_len)
 {
-	char *next_nl;
+	char	*next_nl;
 
 	if (!*buffer)
 		return (0);
@@ -55,10 +55,10 @@ bool handle_start_buffer(char *buffer, char **nl, ssize_t *nl_r_len)
 	}
 }
 
-bool read_buffer(int fd, char *buffer, char **nl, ssize_t *nl_r_len)
+bool	read_buffer(int fd, char *buffer, char **nl, ssize_t *nl_r_len)
 {
-	char *new_str;
-	ssize_t bytes_read;
+	char	*new_str;
+	ssize_t	bytes_read;
 
 	bytes_read = read(fd, buffer, BUFFER_SIZE);
 	if (bytes_read == -1)
@@ -79,14 +79,14 @@ bool read_buffer(int fd, char *buffer, char **nl, ssize_t *nl_r_len)
 	return (0);
 }
 
-char *get_next_line(int fd)
+char	*get_next_line(int fd)
 {
-	static char buffer[BUFFER_SIZE + 1];
-	char *next_nl;
-	char *nl;
-	ssize_t nl_r_len;
+	static char	buffer[BUFFER_SIZE + 1];
+	char		*next_nl;
+	char		*nl;
+	ssize_t		nl_r_len;
 
-	if (fd > MAX_FILE_DESCRIPTOR || fd < 0)
+	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
 	nl = NULL;
 	nl_r_len = 0;
