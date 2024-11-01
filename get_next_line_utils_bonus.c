@@ -12,58 +12,69 @@
 
 #include "get_next_line_bonus.h"
 
-char	*find_nl(char *str, ssize_t bytes_read)
+char *get_next_nl(char *s)
 {
-	ssize_t	i;
+	size_t i;
 
 	i = 0;
-	while (i < bytes_read && str[i])
+	while (i < BUFFER_SIZE && s[i])
 	{
-		if (str[i] == '\n')
-			return (str + i);
+		if (s[i] == '\n')
+			return (s + i);
 		i++;
 	}
 	return (NULL);
 }
 
-void	lst_clear(t_lst *lst)
+char *rstr(const char *s, ssize_t *nl_r_len)
 {
-	if (lst)
-	{
-		lst_clear(lst->next);
-		free(lst);
-	}
-}
+	char *new_str;
+	const ssize_t s_len = ft_strlen(s);
 
-t_lst	*lst_add(t_lst *lst, char *buffer, ssize_t bytes_read)
-{
-	t_lst	*new_element;
-	ssize_t	i;
-
-	new_element = malloc(sizeof(t_lst));
-	if (!new_element)
+	if (*nl_r_len < s_len)
+		*nl_r_len = s_len;
+	new_str = malloc(*nl_r_len + 1);
+	if (!new_str)
 		return (NULL);
-	new_element->next = NULL;
-	i = 0;
-	while (i < bytes_read && buffer[i])
-	{
-		new_element->str[i] = buffer[i];
-		i++;
-	}
-	new_element->str[i] = 0;
-	if (!lst)
-		return (buffer[0] = 0, new_element);
-	while (lst->next)
-		lst = lst->next;
-	lst->next = new_element;
-	return (new_element);
+	ft_memmove(new_str, s, s_len);
+	new_str[s_len] = 0;
+	return (new_str);
 }
 
-void	*ft_memmove(void *dst, const void *src, size_t len)
+bool buffer_join(char **nl, char const *buffer, ssize_t *nl_r_len)
 {
-	unsigned char	*dst_ptr;
-	unsigned char	*src_ptr;
-	size_t			i;
+	const ssize_t nl_len = ft_strlen(*nl);
+	const ssize_t buffer_len = ft_strlen(buffer);
+	char *new_str;
+
+	if (!*nl)
+	{
+		*nl_r_len = BUFFER_SIZE * 2;
+		*nl = rstr(buffer, nl_r_len);
+		return (false);
+	}
+	else if (nl_len + buffer_len < *nl_r_len)
+	{
+		ft_memmove(*nl + nl_len, buffer, buffer_len);
+		(*nl)[nl_len + buffer_len] = 0;
+		return (false);
+	}
+	*nl_r_len = buffer_len + (nl_len * 2);
+	new_str = malloc(*nl_r_len + 1);
+	if (!new_str)
+		return (failure_cleanup(*nl), true);
+	ft_memmove(new_str, *nl, nl_len);
+	ft_memmove(new_str + nl_len, buffer, buffer_len + 1);
+	free(*nl);
+	*nl = new_str;
+	return (false);
+}
+
+void *ft_memmove(void *dst, const void *src, ssize_t len)
+{
+	unsigned char *dst_ptr;
+	unsigned char *src_ptr;
+	ssize_t i;
 
 	if (dst == src || len <= 0)
 		return (dst);
@@ -87,10 +98,12 @@ void	*ft_memmove(void *dst, const void *src, size_t len)
 	return (dst);
 }
 
-size_t	ft_strlen(const char *s)
+ssize_t ft_strlen(const char *s)
 {
-	size_t	i;
+	ssize_t i;
 
+	if (!s)
+		return (0);
 	i = 0;
 	while (s[i])
 		i++;

@@ -11,38 +11,33 @@
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_BONUS_H
-# define GET_NEXT_LINE_BONUS_H
+#define GET_NEXT_LINE_BONUS_H
 
-# include <fcntl.h>
-# include <stddef.h>
-# include <stdio.h>
-# include <stdlib.h>
-# include <unistd.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 5
-# endif
+#ifndef BUFFER_SIZE
+#define BUFFER_SIZE 1
+#endif
 
-# define MAX_FILE_DESCRIPTORS 1024
+#define MAX_FILE_DESCRIPTOR 1024
 
-typedef struct s_lst
-{
-	struct s_lst	*next;
-	char			str[BUFFER_SIZE + 1];
-}					t_lst;
+// Handle Functions
+char *get_next_line(int fd);
+void failure_cleanup(char *nl);
+char *handle_found_nl(char *buffer, char *next_nl, char *nl);
+bool handle_start_buffer(char *buffer, char **nl, ssize_t *nl_r_len);
+bool read_buffer(int fd, char *buffer, char **nl, ssize_t *nl_r_len);
 
-// handle functions
-char				*get_next_line(int fd);
-char				*handle_nl_in_rest(char *next_nl, char *rest);
-char				*handle_zero_read(t_lst *lst, size_t bonus_len);
-char				*handle_nl_found(char *next_nl, char *buffer, t_lst *lst,
-						char *rest);
-
-// utils
-char				*find_nl(char *str, ssize_t bytes_read);
-t_lst				*lst_add(t_lst *lst, char *buffer, ssize_t bytes_read);
-void				lst_clear(t_lst *lst);
-void				*ft_memmove(void *dst, const void *src, size_t len);
-size_t				ft_strlen(const char *s);
+// Utility Functions
+char *get_next_nl(char *s);
+ssize_t ft_strlen(const char *s);
+char *rstr(const char *s, ssize_t *nl_r_len);
+bool buffer_join(char **nl, char const *buffer, ssize_t *nl_r_len);
+void *ft_memmove(void *dst, const void *src, ssize_t len);
 
 #endif
